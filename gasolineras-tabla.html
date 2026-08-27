@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gasolineras · 5 km · Poblenou</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14161a;
+    --panel:#1b1e24;
+    --panel2:#20242b;
+    --line:#2a2f38;
+    --amber:#ffb020;
+    --amber-dim:#7a5a1f;
+    --green:#39ff88;
+    --green-dim:#1f4a34;
+    --text:#f2f1ed;
+    --sub:#8b92a0;
+    --red:#ff6b5e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, #1e222a 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #221c14 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+  header{
+    padding:36px 20px 20px;
+    max-width:1080px;
+    margin:0 auto;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:11.5px;
+    color:var(--amber);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .eyebrow::before{
+    content:'';
+    width:7px;height:7px;border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 8px var(--green);
+  }
+  h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:clamp(26px,4vw,38px);
+    margin:10px 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .sub{
+    color:var(--sub);
+    font-size:14.5px;
+    max-width:640px;
+    line-height:1.55;
+  }
+  .meta-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:18px;
+  }
+  .chip{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--sub);
+    background:var(--panel);
+    border:1px solid var(--line);
+    padding:7px 12px;
+    border-radius:8px;
+  }
+  .chip b{color:var(--text);font-weight:600;}
+  main{max-width:1080px;margin:0 auto;padding:0 20px;}
+  .toolbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin:26px 0 14px;
+  }
+  .sortlabel{font-size:12.5px;color:var(--sub);font-family:'IBM Plex Mono',monospace;}
+  select{
+    background:var(--panel);
+    color:var(--text);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:8px 10px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+  }
+  .btn{
+    background:var(--amber);
+    color:#1a1400;
+    border:none;
+    border-radius:8px;
+    padding:10px 16px;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:12.5px;
+    cursor:pointer;
+    letter-spacing:.02em;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn.secondary{
+    background:transparent;
+    color:var(--amber);
+    border:1px solid var(--amber-dim);
+  }
+  .tablewrap{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    text-align:left;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--sub);
+    padding:14px 14px;
+    border-bottom:1px solid var(--line);
+    white-space:nowrap;
+    cursor:pointer;
+    user-select:none;
+  }
+  thead th:hover{color:var(--amber);}
+  thead th.active{color:var(--amber);}
+  tbody td{
+    padding:13px 14px;
+    border-bottom:1px solid var(--line);
+    font-size:13.5px;
+    vertical-align:top;
+  }
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--panel2);}
+  .station{font-weight:600;}
+  .addr{color:var(--sub);font-size:12px;margin-top:2px;}
+  .dist{
+    font-family:'IBM Plex Mono',monospace;
+    color:var(--sub);
+    font-size:12.5px;
+  }
+  .price{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    font-size:14.5px;
+    font-variant-numeric:tabular-nums;
+    text-shadow:0 0 10px transparent;
+  }
+  .price.na{color:#4a4f58;font-weight:400;}
+  .price.min{
+    color:var(--green);
+    text-shadow:0 0 12px rgba(57,255,136,.35);
+  }
+  .price.min::after{content:' ▾';font-size:10px;}
+  .rank{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:22px;height:22px;
+    border-radius:6px;
+    background:var(--panel2);
+    color:var(--sub);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    margin-right:8px;
+  }
+  tr:nth-child(1) .rank{background:var(--green-dim);color:var(--green);}
+  tr:nth-child(2) .rank,tr:nth-child(3) .rank{background:var(--amber-dim);color:var(--amber);}
+  footer{
+    max-width:1080px;margin:26px auto 0;padding:0 20px;
+    color:var(--sub);font-size:12.5px;line-height:1.6;
+  }
+  footer a{color:var(--amber);text-decoration:none;}
+  .toast{
+    position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);
+    background:var(--panel2);border:1px solid var(--line);
+    padding:12px 18px;border-radius:10px;font-size:13px;
+    opacity:0;transition:.25s;pointer-events:none;
+    font-family:'IBM Plex Mono',monospace;
+    max-width:90vw;text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+  @media (max-width:640px){
+    thead th:nth-child(3), tbody td:nth-child(3){display:none;}
+    .tablewrap{border-radius:10px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Live snapshot · sedeaplicaciones.minetur.gob.es</div>
+  <h1>Gasolineras a 5 km</h1>
+  <p class="sub">Estaciones de servicio en un radio de 5&nbsp;km desde Poblenou (Sant Martí, Barcelona), con los 4 combustibles más comunes. Ordenadas de más barata a más cara. Los precios vienen del registro oficial del Ministerio para la Transición Ecológica.</p>
+  <div class="meta-row">
+    <div class="chip">Fuente: <b id="fetchedAt">—</b></div>
+    <div class="chip"><b id="stationCount">—</b> estaciones</div>
+    <div class="chip">Radio: <b>5 km</b></div>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div>
+      <span class="sortlabel">ORDENAR POR &nbsp;</span>
+      <select id="sortSelect">
+        <option value="g95">Gasolina 95 E5</option>
+        <option value="g98">Gasolina 98 E5</option>
+        <option value="goa">Gasóleo A</option>
+        <option value="gop">Gasóleo Premium</option>
+        <option value="dist">Distancia</option>
+      </select>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn secondary" id="refreshBtn">↻ Actualizar ahora</button>
+      <button class="btn" id="logBtn">Registrar precio más barato →</button>
+    </div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:4%"></th>
+          <th style="width:26%">Estación</th>
+          <th style="width:9%">Distancia</th>
+          <th data-key="g95">Gasolina 95 E5</th>
+          <th data-key="g98">Gasolina 98 E5</th>
+          <th data-key="goa">Gasóleo A</th>
+          <th data-key="gop">Gasóleo Premium</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>
+    Precios en €/L. Al abrir esta página se consulta primero un <b>mirror diario</b> de los datos oficiales (republicado con cabeceras CORS, por eso es fiable desde el navegador) y, si falla, la API del Ministerio directamente vía varias pasarelas. Si ninguna de las dos responde, se muestra el último snapshot guardado en el archivo. Como el precio oficial solo cambia ~1 vez al día, cada actualización registra el precio más barato del momento en el <a href="#" id="histLink">histórico semanal</a> — el segundo archivo que te compartí — solo cuando cambia respecto al último registro, para que la línea de tiempo no se llene de puntos repetidos. Usa almacenamiento compartido si esta página está abierta dentro de Claude, o guardado local en este navegador si se abrió como archivo descargado (en ese caso no se comparte automáticamente con la otra persona).
+  </footer>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// Coordenadas de referencia (Poblenou, Barcelona). Si el navegador da permiso de
+// geolocalización, se usan las coordenadas reales del teléfono en su lugar.
+const FALLBACK_COORDS = {lat:41.4096819, lon:2.2020317};
+
+// Snapshot de respaldo (el último que se pudo consultar en vivo) — se usa solo si
+// TODAS las fuentes en vivo fallan al abrir la página.
+const FALLBACK_FETCHED_AT = "2026-08-06T00:00:00+02:00";
+const FALLBACK_STATIONS = [
+{n:"B-OIL", a:"CALLE BAC DE RODA, 130", d:0.0, g95:1.578, g98:null, goa:1.688, gop:null},
+{n:"M AUTOMOCION", a:"CALLE PERU, 171", d:0.3, g95:1.775, g98:1.895, goa:1.955, gop:1.985},
+{n:"BALLENOIL", a:"CALLE LOPE DE VEGA, 125/139", d:0.4, g95:1.579, g98:null, goa:1.689, gop:1.699},
+{n:"GALP", a:"CALLE BAC DE RODA, 66", d:0.5, g95:1.669, g98:null, goa:1.779, gop:1.829},
+{n:"TAMOIL", a:"CALLE PUJADES, 309", d:0.5, g95:1.599, g98:1.699, goa:1.699, gop:null},
+{n:"BP PEDRO IV", a:"CALLE PEDRO IV, 440", d:0.5, g95:1.799, g98:1.939, goa:1.969, gop:2.059},
+{n:"MOEVE", a:"AVENIDA CLOT, 181", d:1.1, g95:1.769, g98:null, goa:1.939, gop:2.019},
+{n:"CAMPSA", a:"CALLE PUJADES, 154", d:1.1, g95:1.79, g98:1.92, goa:1.966, gop:null},
+{n:"Q8", a:"CARRER PERE IV, 544", d:1.1, g95:1.799, g98:null, goa:1.969, gop:null},
+{n:"PETROPRIX", a:"CALLE BADAJOZ, 108", d:1.3, g95:1.567, g98:null, goa:1.689, gop:null},
+{n:"BALLENOIL", a:"CALLE CLOT, 2", d:1.3, g95:1.599, g98:null, goa:1.689, gop:1.699},
+{n:"BP ALMOGAVARES", a:"CL ALMOGAVARES  159 - 161", d:1.4, g95:1.799, g98:1.939, goa:1.969, gop:2.059},
+{n:"REPSOL", a:"AVENIDA MERIDIANA, 247", d:1.5, g95:1.759, g98:1.879, goa:1.929, gop:null},
+{n:"EVOLUTION", a:"CALLE PERE IV, 79", d:1.6, g95:1.568, g98:1.725, goa:1.717, gop:1.747},
+{n:"REPSOL", a:"AVENIDA DEL LITORAL, 49", d:1.9, g95:1.759, g98:1.879, goa:1.935, gop:null},
+{n:"REPSOL", a:"CALLE VALENCIA, 503", d:1.9, g95:1.755, g98:1.875, goa:1.945, gop:null},
+{n:"GRATSA", a:"PASEO MARAGALL, 33", d:1.9, g95:1.759, g98:1.919, goa:1.939, gop:null},
+{n:"GALP", a:"C/ Rambla Volart, 2 - Passeig Maragall", d:1.9, g95:1.759, g98:null, goa:1.939, gop:1.989},
+{n:"PREMIUM ENERGY LA SAGRERA", a:"CALLE SANTANDER, 50", d:2.0, g95:1.648, g98:null, goa:null, gop:1.748},
+{n:"GALP", a:"CALLE GUIPUZCOA, S/N", d:2.0, g95:1.729, g98:1.849, goa:1.899, gop:1.949},
+{n:"REPSOL", a:"AVENIDA BOGATELL, 49", d:2.0, g95:1.755, g98:1.925, goa:1.935, gop:1.995},
+{n:"CEPSA", a:"CALLE LLULL ESQ EDUAR MARISTANY, S/N", d:2.1, g95:1.759, g98:1.849, goa:1.889, gop:1.929},
+{n:"REPSOL", a:"CALLE GUIPUZCOA ESQ PEDRO IV, S/N", d:2.1, g95:1.749, g98:1.869, goa:1.929, gop:null},
+{n:"GALP", a:"Almogavares, 66", d:2.2, g95:1.709, g98:null, goa:1.889, gop:1.939},
+{n:"MEROIL", a:"CALLE CARRETERA DE MATARO, 10", d:2.3, g95:1.729, g98:1.849, goa:1.899, gop:1.949},
+{n:"REPSOL", a:"CL F.JUNIP.SERRA ESQU.SANTANDER, 91", d:2.6, g95:1.755, g98:1.925, goa:1.925, gop:null},
+{n:"CEPSA", a:"CALLE ROGER DE FLOR, 58", d:2.6, g95:1.749, g98:1.889, goa:1.939, gop:2.019},
+{n:"REPSOL", a:"CALLE DIPUTACION, 371", d:2.7, g95:1.799, g98:1.999, goa:1.899, gop:null},
+{n:"REPSOL", a:"CALLE SANT ADRIA, 81", d:2.9, g95:1.769, g98:1.889, goa:1.895, gop:null},
+{n:"REPSOL", a:"CL AVENIDA ALFONSO XIII, 628", d:2.9, g95:1.755, g98:1.925, goa:1.925, gop:null},
+{n:"ALCAMPO", a:"AVENIDA DE LA PLAYA, S/N", d:3.0, g95:1.466, g98:1.725, goa:1.619, gop:1.716},
+{n:"REPSOL", a:"AVENIDA VIRGEN DE MONTSERRAT, 87", d:3.0, g95:1.755, g98:1.875, goa:1.965, gop:null},
+{n:"GALP", a:"C/TORRASSA, 87-95", d:3.1, g95:1.499, g98:null, goa:1.684, gop:null},
+{n:"BALLENOIL", a:"CALLE CIUDAD DE ASUNCIÓN, 12", d:3.1, g95:1.629, g98:null, goa:1.699, gop:null},
+{n:"BONAREA", a:"CALLE ESTIU, 18,20", d:3.1, g95:1.46, g98:null, goa:1.619, gop:null},
+{n:"REPSOL", a:"CALLE LEGALITAT, 59", d:3.4, g95:1.759, g98:1.879, goa:1.959, gop:null},
+{n:"REPSOL", a:"CL INDUSTRIA, 629", d:3.5, g95:1.755, g98:1.875, goa:1.929, gop:null},
+{n:"PETROCAT DIRECTE", a:"CALLE CIUDAD DE ASUNCIÓN, 69", d:3.7, g95:1.805, g98:1.975, goa:1.885, gop:null},
+{n:"REPSOL", a:"PASEO GUAYAQUIL, 25", d:3.7, g95:1.759, g98:1.879, goa:1.929, gop:1.989},
+{n:"REPSOL", a:"PASEO DOCTOR PI Y MOLIST, 110", d:3.7, g95:1.759, g98:1.879, goa:1.925, gop:null},
+{n:"REPSOL", a:"CL AVENIDA GENERALITAT, 97", d:3.9, g95:1.755, g98:1.875, goa:1.925, gop:null},
+{n:"TAMOIL", a:"CALLE TUCUMAN, 2", d:3.9, g95:1.599, g98:null, goa:1.669, gop:null},
+{n:"REPSOL", a:"CALLE GRAN DE SANT ANDREU, 513", d:4.0, g95:1.755, g98:1.875, goa:1.935, gop:null},
+{n:"CEPSA", a:"PASEO VALLDAURA, 210", d:4.0, g95:1.769, g98:null, goa:1.929, gop:1.989},
+{n:"GALP", a:"CALLE TAJO, 28", d:4.1, g95:1.764, g98:1.894, goa:1.944, gop:null},
+{n:"GARATGE HORTA", a:"PLAZA EIVISSA, 12", d:4.2, g95:1.758, g98:null, goa:1.898, gop:null},
+{n:"TAMOIL", a:"AVINGUDA MARQUES DE MONTROIG, 125", d:4.2, g95:1.629, g98:1.699, goa:1.699, gop:null},
+{n:"REPSOL", a:"PASEO SANTA COLOMA, 71", d:4.2, g95:1.755, g98:1.875, goa:1.935, gop:null},
+{n:"EVOLUTION", a:"CALLE INDUSTRIA, 371", d:4.3, g95:1.578, g98:1.735, goa:1.696, gop:1.726},
+{n:"BP BADANOR", a:"PLAZA CARITG, 1", d:4.4, g95:1.739, g98:1.879, goa:1.909, gop:1.999},
+{n:"MEROIL", a:"AVENIDA MERIDIANA, 666", d:4.4, g95:1.567, g98:1.894, goa:1.677, gop:1.804},
+{n:"ESTACION DE SERVICIO FAVENCIA JULIA", a:"VÍA JULIA, 207", d:4.4, g95:1.749, g98:1.849, goa:1.859, gop:null},
+{n:"GRATSA", a:"CASANOVA 23", d:4.5, g95:1.759, g98:null, goa:1.939, gop:null},
+{n:"CEPSA", a:"CALLE CASANOVA, 89", d:4.6, g95:1.729, g98:1.859, goa:1.889, gop:1.939},
+{n:"BP VIA FAVENCIA", a:"CL VIA FAVENCIA  75 - 121", d:4.6, g95:1.755, g98:1.895, goa:1.915, gop:2.005},
+{n:"REPSOL", a:"CALLE BALMES, 288", d:4.7, g95:1.789, g98:1.899, goa:1.955, gop:null},
+{n:"REPSOL", a:"PASEO VALLDAURA, 106", d:4.7, g95:1.769, g98:1.879, goa:1.939, gop:null},
+{n:"FITOGAS", a:"AVDA. ALFONS XIII, 24 (N-II km 636,5)", d:4.9, g95:1.757, g98:1.887, goa:1.947, gop:null},
+{n:"MOEVE", a:"CALLE COMTE D'URGELL, 219", d:5.0, g95:1.779, g98:1.899, goa:1.955, gop:1.999},
+{n:"BALLENOIL", a:"CALLE MOZART, 24", d:5.1, g95:1.629, g98:null, goa:1.699, gop:1.719},
+{n:"GALP", a:"AVINGUDA DEL PARALELO, 132", d:5.2, g95:1.679, g98:1.799, goa:1.869, gop:1.919},
+{n:"BALLENOIL", a:"CALLE CRAYWINKEL, 1", d:5.2, g95:1.609, g98:null, goa:1.699, gop:1.719},
+];
+
+let STATIONS = FALLBACK_STATIONS;
+let SOURCE_MODE = 'fallback'; // 'mirror' | 'proxy' | 'fallback'
+let STORAGE_MODE = null; // 'compartido' | 'local' — set on first successful write
+
+// window.storage (compartido entre quien abra el archivo) solo existe dentro de la
+// vista previa de Claude. Si el archivo se abrió descargado o alojado en otro sitio,
+// no existe — en ese caso usamos localStorage como respaldo (funciona, pero el
+// histórico deja de ser compartido y queda solo en este dispositivo/navegador).
+async function storageGet(key){
+  try{
+    if(window.storage){
+      const r = await window.storage.get(key, true);
+      return r ? r.value : null;
+    }
+  }catch(e){ /* fall through to local */ }
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+async function storageSet(key, value){
+  try{
+    if(window.storage){
+      await window.storage.set(key, value, true);
+      STORAGE_MODE = 'compartido';
+      return;
+    }
+  }catch(e){ /* fall through to local */ }
+  try{ localStorage.setItem(key, value); STORAGE_MODE = 'local'; }
+  catch(e){ STORAGE_MODE = null; throw e; }
+}
+
+function fmt(v){ return v==null ? '—' : v.toFixed(3).replace('.',','); }
+
+function haversineKm(lat1, lon1, lat2, lon2){
+  const toRad = d => d * Math.PI / 180;
+  const R = 6371;
+  const dLat = toRad(lat2-lat1), dLon = toRad(lon2-lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLon/2)**2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function getLocation(){
+  return new Promise((resolve)=>{
+    if(!navigator.geolocation){ resolve(FALLBACK_COORDS); return; }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({lat:pos.coords.latitude, lon:pos.coords.longitude}),
+      () => resolve(FALLBACK_COORDS),
+      {timeout:4000, maximumAge:5*60*1000}
+    );
+  });
+}
+
+function parseNum(v){
+  if(v==null) return null;
+  const s = String(v).trim();
+  if(s==='') return null;
+  const n = parseFloat(s.replace(',','.'));
+  return isNaN(n) ? null : n;
+}
+
+// The official feed (sedeaplicaciones.minetur.gob.es) doesn't send CORS headers, so a
+// direct browser fetch usually fails. Primary strategy: a daily-refreshed public mirror
+// of the same official data, republished via GitHub Pages/raw.githubusercontent.com,
+// which *does* send CORS headers — that's what makes it fetchable from a static page.
+// If that mirror is ever down, we fall back through a chain of generic CORS relays
+// pointed at the original government API, and only fall back to the frozen snapshot
+// baked into this file if every single one of those fails too.
+const MIRROR_SOURCES = [
+  'https://raw.githubusercontent.com/IvanAraque/precios-carburantes/main/docs/data/estaciones.json',
+  'https://cdn.jsdelivr.net/gh/IvanAraque/precios-carburantes@main/docs/data/estaciones.json',
+];
+
+function buildProxyAttempts(targetUrl){
+  const enc = encodeURIComponent(targetUrl);
+  return [
+    {label:'directo', url: targetUrl},
+    {label:'allorigins', url: `https://api.allorigins.win/raw?url=${enc}`},
+    {label:'corsproxy.io', url: `https://corsproxy.io/?url=${enc}`},
+    {label:'thingproxy', url: `https://thingproxy.freeboard.io/fetch/${targetUrl}`},
+    {label:'codetabs', url: `https://api.codetabs.com/v1/proxy?quest=${enc}`},
+  ];
+}
+
+async function fetchJson(url){
+  const res = await fetch(url, {mode:'cors', signal: AbortSignal.timeout(9000)});
+  if(!res.ok) throw new Error('bad status '+res.status);
+  return res.json();
+}
+
+// Strategy A: nationwide mirror (updated once a day, but reliably CORS-fetchable).
+async function tryMirror(coords){
+  for(const url of MIRROR_SOURCES){
+    try{
+      const data = await fetchJson(url);
+      if(!data || !data.municipios) continue;
+      const cols = data.columnas; // [rotulo, direccion, lat, lon, g95, g98, goa, gop, glp, horario]
+      const out = [];
+      for(const stations of Object.values(data.municipios)){
+        for(const row of stations){
+          const [rotulo, direccion, lat, lon, g95, g98, goa, gop] = row;
+          if(lat==null || lon==null) continue;
+          if(g95==null && g98==null && goa==null && gop==null) continue;
+          const d = haversineKm(coords.lat, coords.lon, lat, lon);
+          if(d > 5.2) continue;
+          out.push({n:(rotulo||'').trim(), a:(direccion||'').trim(), d, g95, g98, goa, gop});
+        }
+      }
+      if(out.length) return {stations: out, fetchedAt: data.actualizado || null};
+    }catch(e){ /* try next mirror */ }
+  }
+  return null;
+}
+
+// Strategy B: hit the official API directly through a chain of generic CORS relays.
+async function fetchMunicipioViaProxies(idMunicipio){
+  const target = `https://sedeaplicaciones.minetur.gob.es/ServiciosRESTCarburantes/PreciosCarburantes/EstacionesTerrestres/FiltroMunicipio/${idMunicipio}`;
+  for(const attempt of buildProxyAttempts(target)){
+    try{
+      const data = await fetchJson(attempt.url);
+      if(data && Array.isArray(data.ListaEESSPrecio)) return data.ListaEESSPrecio;
+    }catch(e){ /* try next proxy */ }
+  }
+  return null;
+}
+
+async function tryOfficialViaProxies(coords){
+  const [bcn, bdn] = await Promise.all([fetchMunicipioViaProxies(881), fetchMunicipioViaProxies(875)]);
+  const raw = [...(bcn||[]), ...(bdn||[])];
+  if(raw.length === 0) return null;
+  const out = [];
+  for(const r of raw){
+    const lat = parseNum(r['Latitud']);
+    const lon = parseNum(r['Longitud (WGS84)']);
+    if(lat==null || lon==null || (lat===0 && lon===0)) continue;
+    const g95 = parseNum(r['Precio Gasolina 95 E5']);
+    const g98 = parseNum(r['Precio Gasolina 98 E5']);
+    const goa = parseNum(r['Precio Gasoleo A']);
+    const gop = parseNum(r['Precio Gasoleo Premium']);
+    if(g95==null && g98==null && goa==null && gop==null) continue;
+    const d = haversineKm(coords.lat, coords.lon, lat, lon);
+    if(d > 5.2) continue;
+    out.push({n:(r['Rótulo']||'').trim(), a:(r['Dirección']||'').trim(), d, g95, g98, goa, gop});
+  }
+  return out.length ? {stations: out, fetchedAt: null} : null;
+}
+
+async function tryLiveUpdate(){
+  const coords = await getLocation();
+  const viaMirror = await tryMirror(coords);
+  if(viaMirror) return {...viaMirror, mode:'mirror'};
+  const viaProxies = await tryOfficialViaProxies(coords);
+  if(viaProxies) return {...viaProxies, mode:'proxy'};
+  return null;
+}
+
+function render(sortKey){
+  const cols = ['g95','g98','goa','gop'];
+  const mins = {};
+  cols.forEach(c=>{
+    const vals = STATIONS.map(s=>s[c]).filter(v=>v!=null);
+    mins[c] = vals.length ? Math.min(...vals) : null;
+  });
+
+  const sorted = [...STATIONS].sort((a,b)=>{
+    if(sortKey==='dist') return a.d - b.d;
+    const av = a[sortKey], bv = b[sortKey];
+    if(av==null && bv==null) return 0;
+    if(av==null) return 1;
+    if(bv==null) return -1;
+    return av - bv;
+  });
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = sorted.map((s,i)=>{
+    const cell = (key)=>{
+      const v = s[key];
+      const isMin = v!=null && v===mins[key];
+      return `<td><span class="price ${v==null?'na':''} ${isMin?'min':''}">${fmt(v)}</span></td>`;
+    };
+    return `<tr>
+      <td><span class="rank">${i+1}</span></td>
+      <td><div class="station">${s.n}</div><div class="addr">${s.a}</div></td>
+      <td class="dist">${s.d.toFixed(1)} km</td>
+      ${cell('g95')}${cell('g98')}${cell('goa')}${cell('gop')}
+    </tr>`;
+  }).join('');
+
+  document.querySelectorAll('thead th[data-key]').forEach(th=>{
+    th.classList.toggle('active', th.dataset.key===sortKey);
+  });
+}
+
+const sortSelect = document.getElementById('sortSelect');
+sortSelect.addEventListener('change', ()=>render(sortSelect.value));
+document.querySelectorAll('thead th[data-key]').forEach(th=>{
+  th.addEventListener('click', ()=>{ sortSelect.value = th.dataset.key; render(th.dataset.key); });
+});
+
+function showToast(msg, ms=3200){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(showToast._h);
+  showToast._h = setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+// --- Log cheapest price snapshot to shared history ---
+async function logCheapest(silent){
+  let best = null;
+  const labelMap = {g95:'Gasolina 95 E5', g98:'Gasolina 98 E5', goa:'Gasóleo A', gop:'Gasóleo Premium'};
+  STATIONS.forEach(s=>{
+    ['g95','g98','goa','gop'].forEach(k=>{
+      if(s[k]!=null && (best===null || s[k] < best.price)){
+        best = {price:s[k], station:s.n, address:s.a, fuel:labelMap[k], fuelKey:k};
+      }
+    });
+  });
+  if(!best) return;
+
+  try{
+    let hist = [];
+    try{
+      const existing = await storageGet('gas:history');
+      if(existing) hist = JSON.parse(existing);
+    }catch(e){ hist = []; }
+
+    // Los precios oficiales solo se actualizan ~1 vez al día, así que no tiene sentido
+    // apuntar el mismo valor cada 30 min: si el último registro es el mismo precio,
+    // mismo combustible y misma estación, y tiene menos de 20 h, no se duplica.
+    const last = hist[hist.length-1];
+    const isDuplicate = last && last.price===best.price && last.fuel===best.fuel &&
+                         last.station===best.station && (Date.now()-last.ts) < 20*60*60*1000;
+    if(isDuplicate){
+      if(!silent) showToast(`Sin cambios desde el último registro: ${best.fuel} · ${fmt(best.price)} €/L · ${best.station}`);
+      return;
+    }
+
+    hist.push({ts:Date.now(), price:best.price, station:best.station, address:best.address, fuel:best.fuel, source:SOURCE_MODE});
+    if(hist.length>1000) hist = hist.slice(hist.length-1000);
+    await storageSet('gas:history', JSON.stringify(hist));
+    if(!silent) showToast(`Registrado (${STORAGE_MODE}): ${best.fuel} · ${fmt(best.price)} €/L · ${best.station}`);
+  }catch(e){
+    if(!silent) showToast('No se pudo guardar ni en el histórico compartido ni localmente en este navegador.');
+  }
+}
+document.getElementById('logBtn').addEventListener('click', ()=>logCheapest(false));
+document.getElementById('histLink').addEventListener('click', (e)=>e.preventDefault());
+
+// --- Full refresh cycle: fetch live data (with fallbacks), render, log ---
+async function refreshCycle(isManual){
+  if(isManual) showToast('Consultando mirror diario + fuente oficial (directo y 4 pasarelas) …', 3000);
+  const live = await tryLiveUpdate();
+  if(live && live.stations.length){
+    STATIONS = live.stations.sort((a,b)=>a.d-b.d);
+    SOURCE_MODE = live.mode;
+    const label = live.mode === 'mirror' ? 'mirror diario (GitHub)' : 'API oficial en vivo';
+    const dateStr = live.fetchedAt ? new Date(live.fetchedAt).toLocaleDateString('es-ES',{dateStyle:'medium'}) : new Date().toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'});
+    document.getElementById('fetchedAt').textContent = `${label} · ${dateStr}`;
+    if(isManual) showToast(`Actualizado (${label}) — ${STATIONS.length} estaciones.`);
+  } else {
+    STATIONS = FALLBACK_STATIONS;
+    SOURCE_MODE = 'fallback';
+    document.getElementById('fetchedAt').textContent = 'snapshot guardado · ' + new Date(FALLBACK_FETCHED_AT).toLocaleString('es-ES',{dateStyle:'medium',timeStyle:'short'});
+    if(isManual) showToast('Ni el mirror diario ni la API oficial (directo + 4 pasarelas) respondieron. Mostrando el último snapshot guardado.', 5500);
+  }
+  document.getElementById('stationCount').textContent = STATIONS.length;
+  render(sortSelect.value || 'g95');
+  await logCheapest(true);
+}
+
+document.getElementById('refreshBtn').addEventListener('click', ()=>refreshCycle(true));
+
+// Update every time the page is opened, and again every 30 min while it stays open.
+refreshCycle(false);
+setInterval(()=>refreshCycle(false), 30*60*1000);
+</script>
+</body>
+</html>

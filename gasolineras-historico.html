@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Histórico semanal · Precio más barato</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#14161a;
+    --panel:#1b1e24;
+    --panel2:#20242b;
+    --line:#2a2f38;
+    --amber:#ffb020;
+    --amber-dim:#7a5a1f;
+    --green:#39ff88;
+    --green-dim:#1f4a34;
+    --text:#f2f1ed;
+    --sub:#8b92a0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 500px at 90% -10%, #1e222a 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 0%, #142219 0%, transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Inter',system-ui,sans-serif;
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+  header{max-width:1080px;margin:0 auto;padding:36px 20px 10px;}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    font-size:11.5px;
+    color:var(--green);
+    display:flex;align-items:center;gap:8px;
+  }
+  .eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,4vw,38px);margin:10px 0 6px;letter-spacing:-0.01em;}
+  .sub{color:var(--sub);font-size:14.5px;max-width:640px;line-height:1.55;}
+  main{max-width:1080px;margin:0 auto;padding:0 20px;}
+
+  .statrow{display:flex;gap:14px;flex-wrap:wrap;margin:26px 0;}
+  .stat{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 20px;flex:1;min-width:200px;
+  }
+  .stat .label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--sub);}
+  .stat .value{
+    font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:26px;margin-top:8px;
+    color:var(--green); text-shadow:0 0 14px rgba(57,255,136,.3);
+    font-variant-numeric:tabular-nums;
+  }
+  .stat .value small{font-size:13px;color:var(--sub);font-weight:400;margin-left:4px;}
+  .stat .detail{margin-top:6px;font-size:12.5px;color:var(--sub);}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:22px 22px 10px;margin-bottom:22px;
+  }
+  .panel h2{
+    font-family:'Space Grotesk',sans-serif;font-size:15px;margin:0 0 16px;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .panel h2 span{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--sub);font-weight:500;}
+  canvas{max-height:280px;}
+
+  table{width:100%;border-collapse:collapse;margin-top:4px;}
+  thead th{
+    text-align:left;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;
+    text-transform:uppercase;color:var(--sub);padding:12px 12px;border-bottom:1px solid var(--line);
+  }
+  tbody td{padding:12px;border-bottom:1px solid var(--line);font-size:13.5px;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:var(--panel2);}
+  .price{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;}
+  .ts{font-family:'IBM Plex Mono',monospace;color:var(--sub);font-size:12.5px;white-space:nowrap;}
+  .fuel-tag{
+    display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;
+    background:var(--panel2);border:1px solid var(--line);border-radius:6px;
+    padding:3px 8px;color:var(--amber);
+  }
+  .empty{
+    text-align:center;color:var(--sub);padding:50px 20px;font-size:13.5px;line-height:1.7;
+  }
+  .empty b{color:var(--text);}
+  footer{max-width:1080px;margin:10px auto 0;padding:0 20px;color:var(--sub);font-size:12.5px;line-height:1.6;}
+  .btn{
+    background:transparent;color:var(--green);border:1px solid var(--green-dim);
+    border-radius:8px;padding:8px 14px;font-family:'IBM Plex Mono',monospace;
+    font-size:12px;cursor:pointer;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Histórico compartido · última semana</div>
+  <h1>Precio más barato en el tiempo</h1>
+  <p class="sub">Cada vez que se abre la tabla de gasolineras (o se pulsa "Registrar"), se guarda aquí el precio más bajo detectado en ese momento: estación, tipo de combustible y hora exacta. Esta página lee el mismo histórico compartido, así que cualquiera con quien lo compartas ve los mismos registros.</p>
+</header>
+
+<main>
+  <div class="statrow">
+    <div class="stat">
+      <div class="label">Ahora mismo</div>
+      <div class="value" id="nowPrice">—<small>€/L</small></div>
+      <div class="detail" id="nowDetail">Sin registros todavía</div>
+    </div>
+    <div class="stat">
+      <div class="label">Mínimo semana</div>
+      <div class="value" id="minPrice">—<small>€/L</small></div>
+      <div class="detail" id="minDetail">—</div>
+    </div>
+    <div class="stat">
+      <div class="label">Registros semana</div>
+      <div class="value" id="countVal" style="color:var(--amber);text-shadow:0 0 14px rgba(255,176,32,.3);">—</div>
+      <div class="detail">snapshots guardados</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Evolución <span id="rangeLabel"></span></h2>
+    <canvas id="chart" height="90"></canvas>
+  </div>
+
+  <div class="panel" id="tablePanel">
+    <h2>Registros <span>estación · combustible · hora</span></h2>
+    <div id="tableHost"></div>
+  </div>
+
+  <footer>
+    Este histórico se guarda mientras la tabla de gasolineras permanece abierta en algún dispositivo (registro automático al abrir y cada 30 min). Como el precio oficial solo cambia ~1 vez al día, no se guarda un punto nuevo si el precio más barato no ha cambiado desde el último registro — así la línea muestra un escalón por cada cambio real de precio, en vez de docenas de puntos repetidos. Claude no puede ejecutar un scraper en segundo plano de forma permanente — si nadie abre la tabla en varios días, tampoco se añaden puntos nuevos. Si ambos abrís los archivos dentro de Claude, el histórico es compartido automáticamente; si los abrís como archivos descargados fuera de Claude, cada navegador guarda su propio histórico local y no se sincroniza entre vosotros. Para forzar un registro, abre la tabla y pulsa "Registrar precio más barato".
+    <div style="margin-top:12px;"><button class="btn" id="refreshBtn">↻ Volver a leer el histórico</button></div>
+  </footer>
+</main>
+
+<script>
+function fmt(v){ return v==null ? '—' : v.toFixed(3).replace('.',','); }
+function timeLabel(ts){
+  return new Date(ts).toLocaleString('es-ES',{hour:'2-digit',minute:'2-digit',day:'2-digit',month:'2-digit'});
+}
+
+async function storageGet(key){
+  try{
+    if(window.storage){
+      const r = await window.storage.get(key, true);
+      return r ? r.value : null;
+    }
+  }catch(e){ /* fall through to local */ }
+  try{ return localStorage.getItem(key); }catch(e){ return null; }
+}
+
+let chart = null;
+
+async function load(){
+  let hist = [];
+  try{
+    const raw = await storageGet('gas:history');
+    if(raw) hist = JSON.parse(raw);
+  }catch(e){ hist = []; }
+
+  const now = Date.now();
+  const cutoff = now - 7*24*60*60*1000;
+  const recent = hist.filter(h => h.ts >= cutoff).sort((a,b)=>a.ts-b.ts);
+
+  const tableHost = document.getElementById('tableHost');
+  const rangeLabel = document.getElementById('rangeLabel');
+
+  if(recent.length === 0){
+    document.getElementById('nowPrice').innerHTML = '—<small>€/L</small>';
+    document.getElementById('nowDetail').textContent = 'Sin registros todavía';
+    document.getElementById('minPrice').innerHTML = '—<small>€/L</small>';
+    document.getElementById('minDetail').textContent = '—';
+    document.getElementById('countVal').textContent = '0';
+    rangeLabel.textContent = '';
+    tableHost.innerHTML = `<div class="empty">Todavía no hay ningún precio registrado en la última semana.<br>
+      Abre <b>la tabla de gasolineras</b> — al cargarla registra automáticamente el precio más barato del momento, y desde ahí puedes registrar más snapshots manualmente.</div>`;
+    if(chart){ chart.destroy(); chart=null; }
+    return;
+  }
+
+  const last = recent[recent.length-1];
+  document.getElementById('nowPrice').innerHTML = `${fmt(last.price)}<small>€/L</small>`;
+  document.getElementById('nowDetail').textContent = `${last.fuel} · ${last.station}`;
+
+  const minEntry = recent.reduce((a,b)=> b.price < a.price ? b : a, recent[0]);
+  document.getElementById('minPrice').innerHTML = `${fmt(minEntry.price)}<small>€/L</small>`;
+  document.getElementById('minDetail').textContent = `${minEntry.fuel} · ${minEntry.station} · ${timeLabel(minEntry.ts)}`;
+
+  document.getElementById('countVal').textContent = recent.length;
+  rangeLabel.textContent = `${timeLabel(recent[0].ts)} → ${timeLabel(last.ts)}`;
+
+  // table, most recent first
+  tableHost.innerHTML = `<table>
+    <thead><tr><th>Hora</th><th>Precio</th><th>Combustible</th><th>Estación</th><th>Dirección</th></tr></thead>
+    <tbody>
+      ${[...recent].reverse().map(h=>`<tr>
+        <td class="ts">${timeLabel(h.ts)}</td>
+        <td class="price">${fmt(h.price)} €/L</td>
+        <td><span class="fuel-tag">${h.fuel}</span></td>
+        <td>${h.station}</td>
+        <td style="color:var(--sub)">${h.address||''}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+
+  // chart
+  const labels = recent.map(h=>timeLabel(h.ts));
+  const data = recent.map(h=>h.price);
+  const ctx = document.getElementById('chart').getContext('2d');
+  if(chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{
+        data,
+        borderColor:'#39ff88',
+        backgroundColor:'rgba(57,255,136,0.08)',
+        pointBackgroundColor:'#39ff88',
+        pointRadius:3,
+        borderWidth:2,
+        fill:true,
+        tension:0,
+        stepped:'before',
+      }]
+    },
+    options:{
+      responsive:true,
+      plugins:{ legend:{display:false},
+        tooltip:{
+          callbacks:{
+            label:(ctx)=> {
+              const h = recent[ctx.dataIndex];
+              return `${fmt(h.price)} €/L · ${h.fuel} · ${h.station}`;
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ ticks:{ color:'#8b92a0', font:{family:'IBM Plex Mono', size:10}, maxRotation:0, autoSkip:true }, grid:{ color:'#2a2f38' } },
+        y:{ ticks:{ color:'#8b92a0', font:{family:'IBM Plex Mono', size:10}, callback:(v)=>v.toFixed(2) }, grid:{ color:'#2a2f38' } }
+      }
+    }
+  });
+}
+
+document.getElementById('refreshBtn').addEventListener('click', load);
+load();
+</script>
+</body>
+</html>
